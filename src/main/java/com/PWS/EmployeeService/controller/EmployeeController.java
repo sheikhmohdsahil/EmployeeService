@@ -2,6 +2,7 @@ package com.PWS.EmployeeService.controller;
 
 import com.PWS.EmployeeService.Utility.ApiSuccess;
 import com.PWS.EmployeeService.Utility.CommonUtils;
+import com.PWS.EmployeeService.Utility.SwaggerLogsConstants;
 import com.PWS.EmployeeService.dto.*;
 import com.PWS.EmployeeService.entity.Skill;
 import com.PWS.EmployeeService.entity.User;
@@ -10,6 +11,10 @@ import com.PWS.EmployeeService.exception.PWSException;
 import com.PWS.EmployeeService.jwtconfig.JwtUtil;
 import com.PWS.EmployeeService.service.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +40,14 @@ public class EmployeeController {
     private JwtUtil jwtUtil;
     @Autowired
     private AuthenticationManager authenticationManager;
-    @Operation(summary = "Authenticating the User")
+
+    @Operation(summary = "Login")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Authenticated successfully", content = {
+                    @Content(mediaType = "application/json",examples = {@ExampleObject(value = SwaggerLogsConstants.Authenticate_200_SUCCESS)}) }),
+            @ApiResponse(responseCode = "400", description = "Invalid UserName/Password supplied", content = {
+                    @Content(mediaType = "application/json",examples = {@ExampleObject(value = SwaggerLogsConstants.Authenticate_400_Failure)})}),
+            @ApiResponse(responseCode = "404", description = "User Not Found", content = @Content) })
     @PostMapping("/authenticate")
     public String generateToken(@RequestBody LoginDto loginDto) throws Exception {
         try {
@@ -47,11 +59,20 @@ public class EmployeeController {
         return new String("token:" + jwtUtil.generateToken(loginDto.getEmail()));
     }
 
+    @Operation(summary = "SignUp")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "SignUp Successfull",
+                    content = { @Content(mediaType = "application/json"
+                    ) }),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = "Invalid Credentials",
+                    content = @Content) })
     @PostMapping("/public/employeeSignUp")
     public ResponseEntity<Object> employeeSignUp(@RequestBody SignUpDto signUpDto) throws Exception {
 
     employeeService.employeeSignUp(signUpDto);
-        return CommonUtils.buildResponseEntity(new ApiSuccess(HttpStatus.OK));
+        return CommonUtils.buildResponseEntity(new ApiSuccess(HttpStatus.CREATED));
     }
 
 
@@ -73,6 +94,7 @@ public class EmployeeController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token.");
         }
     }
+
     @GetMapping("/private/fetchByEmployeeId/{id}")
     public ResponseEntity<Object> fetchEmployeeById(@PathVariable Integer id){
 
@@ -106,13 +128,30 @@ public class EmployeeController {
 
 
     //skills
-
+    @Operation(summary = "Adding Skill")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Skill Added Successfully",
+                    content = { @Content(mediaType = "application/json"
+                    ) }),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = " Not found",
+                    content = @Content) })
     @PostMapping("/private/addSkills")
     public ResponseEntity<Object> addSkills(@RequestBody Skill skill) throws Exception{
         employeeService.createSkills(skill);
         return CommonUtils.buildResponseEntity(new ApiSuccess(HttpStatus.OK));
     }
 
+    @Operation(summary = "Deleting  Skill by Id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Skill Deleted Successfully",
+                    content = { @Content(mediaType = "application/json"
+                    ) }),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = " Not found",
+                    content = @Content) })
     @DeleteMapping("/private/deleteSkills/{id}")
     public ResponseEntity<Object> deleteSkills(@PathVariable Integer id){
         employeeService.deleteSkills(id);
@@ -121,6 +160,15 @@ public class EmployeeController {
 
 
 
+    @Operation(summary = "Add Skill To User")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Skill Added to user Successfully",
+                    content = { @Content(mediaType = "application/json"
+                    ) }),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = " Not found",
+                    content = @Content) })
     @PostMapping("/private/addSkillsToUser")
     public ResponseEntity<Object> addSkillsToUser(@RequestBody UserSkillRefDto userSkillRefDto)throws Exception{
         employeeService.addSkillsToUser(userSkillRefDto);
@@ -128,6 +176,15 @@ public class EmployeeController {
     }
 
 
+    @Operation(summary = "User Details After Login")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User Details fetched Successfully",
+                    content = { @Content(mediaType = "application/json"
+                    ) }),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = " User Not found",
+                    content = @Content) })
     @GetMapping("/private/user-login-information")
     public ResponseEntity<Object> getUserInformation(@RequestParam String email)throws Exception{
         UserBasicDetailsDto userBasicDetailsDto=employeeService.getInformationAfterUserLogin(email);
@@ -135,7 +192,15 @@ public class EmployeeController {
 
     }
 
-
+    @Operation(summary = "Fetching Skill by User's Id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Skill Fetched Successfully",
+                    content = { @Content(mediaType = "application/json"
+                    ) }),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = " Not found",
+                    content = @Content) })
     @GetMapping("/private/user-skills-by-id/{id}")
     public ResponseEntity<Object> fetchUserSkillsByid(@PathVariable Integer id) throws Exception {
         List<Skill> listOfActiveUserSkillXref=  employeeService.fetchuserSkillsByid(id);
@@ -144,6 +209,19 @@ public class EmployeeController {
 
     }
 
+
+
+
+
+    @Operation(summary = "Fetch All User Skills Using Pagination")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User Skills Fetched Successfully",
+                    content = { @Content(mediaType = "application/json"
+                    ) }),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = "User Skills Not found",
+                    content = @Content) })
     @GetMapping("/private/allskills")
     public ResponseEntity<Object> findAllSkills(
             @RequestParam(value = "page", required = false, defaultValue = "0") Integer pageNumber,
