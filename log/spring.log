@@ -4463,3 +4463,4 @@ Caused by: com.fasterxml.jackson.core.JsonParseException: Unexpected character (
 2023-03-31 16:18:18.922  INFO 16508 --- [main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8081
 2023-03-31 16:18:18.966  INFO 16508 --- [DiscoveryClient-InstanceInfoReplicator-0] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_EMPLOYSERVICE/DESKTOP-MPF5DJK:employService:8081 - registration status: 204
 2023-03-31 16:18:19.072  INFO 16508 --- [main] c.P.E.EmployeeServiceApplication         : Started EmployeeServiceApplication in 12.484 seconds (JVM running for 13.628)
+2023-03-31 16:23:18.442  INFO 16508 --- [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
